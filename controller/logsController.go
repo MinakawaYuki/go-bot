@@ -31,27 +31,17 @@ func GetEventMessage(c *gin.Context) {
 		if data["meta_event_type"] != "heartbeat" {
 			fmt.Println("buf", Bytes2Map(message))
 			if data["message_type"] == "private" && data["post_type"] == "message" && data["raw_message"] == "测试" {
-				//str := "{\"action:\"send_private_msg\",\"user_id\":\"283213563\",\"message\":\"回复\"}"
 				sendData := map[string]string{
 					"action":  "send_private_msg",
 					"user_id": GetString(data["user_id"]),
 					"message": "回复",
 				}
-				SendMessageToUser(sendData)
+				HandlePrivateRequest(sendData)
 			}
 		}
 		if err != nil {
 			break
 		}
-	}
-}
-
-// SendMessageToUser SendMessage 发送信息
-func SendMessageToUser(data map[string]string) {
-	url := "http://127.0.0.1:5700/" + data["action"] + "?user_id=" + data["user_id"] + "&message=" + data["message"]
-	_, err := http.Get(url)
-	if err != nil {
-		fmt.Println("sendErr", err)
 	}
 }
 
