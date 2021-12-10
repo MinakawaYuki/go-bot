@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
-	"math/big"
+	"go-bot/service"
 	"net/http"
 )
 
@@ -29,35 +29,15 @@ func GetEventMessage(c *gin.Context) {
 		_, message, err := ws.ReadMessage()
 		data := Bytes2Map(message)
 		if data["meta_event_type"] != "heartbeat" {
-			fmt.Println("buf", Bytes2Map(message))
-			if data["message_type"] == "private" && data["post_type"] == "message" && data["raw_message"] == "测试" {
-				sendData := map[string]string{
-					"action":  "send_private_msg",
-					"user_id": GetString(data["user_id"]),
-					"message": "回复",
-				}
-				HandlePrivateRequest(sendData)
+			if data["post_type"] == "message" {
+				fmt.Println("[收到message]:", Bytes2Map(message))
+				service.CommandHandler(data)
 			}
 		}
 		if err != nil {
 			break
 		}
 	}
-}
-
-// GetString 类型断言
-func GetString(v interface{}) string {
-	var str string
-	switch v.(type) {
-	case float64:
-		vv := v.(float64)
-		data := big.NewRat(1, 1)
-		data.SetFloat64(vv)
-		str = data.FloatString(0)
-		break
-	}
-	println("str", str)
-	return str
 }
 
 // Bytes2Map 将ws获取的字节流转换为map并返回

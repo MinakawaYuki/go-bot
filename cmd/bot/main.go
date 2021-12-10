@@ -1,6 +1,6 @@
 package main
 
-import "spider/router"
+import "go-bot/router"
 
 func main() {
 	router.InitRouter()

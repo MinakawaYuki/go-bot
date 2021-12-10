@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"spider/controller"
+	"go-bot/controller"
 )
 
 func InitRouter() {
