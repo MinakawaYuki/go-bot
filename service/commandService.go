@@ -18,6 +18,9 @@ func CommandHandler(data map[string]interface{}) {
 		sendData["type_id"] = GetString(data["group_id"])
 	}
 	sendData["message"] = GetMessage(GetString(data["raw_message"]))
+	if sendData["message"] == "" {
+		return
+	}
 	fmt.Println("[发送消息体]:", sendData)
 	SendRequest(sendData)
 }
