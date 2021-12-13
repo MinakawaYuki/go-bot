@@ -29,7 +29,7 @@ func GetEventMessage(c *gin.Context) {
 		_, message, err := ws.ReadMessage()
 		data := Bytes2Map(message)
 		if data["meta_event_type"] != "heartbeat" {
-			if data["post_type"] == "message" {
+			if data["post_type"] == "message" && (data["message_type"] == "private" || data["message_type"] == "group") {
 				fmt.Println("[收到message]:", Bytes2Map(message))
 				service.CommandHandler(data)
 			}

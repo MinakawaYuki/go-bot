@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"go-bot/utils/fflogs"
 	"go-bot/utils/taro"
 	"math/big"
 )
@@ -51,6 +52,9 @@ func GetMessage(msg string) string {
 	//	"[CQ:image,file=https://gchat.qpic.cn/gchatpic_new/283213563/3920014266-3050691720-157FB307D61F908C2F5C29F095BD74A6/0?term=3]"
 	if msg == "taro" {
 		str = taro.GetTaro()
+	}
+	if msg == "logs" {
+		fflogs.GetRanking(make(map[string]string))
 	}
 	return str
 }
