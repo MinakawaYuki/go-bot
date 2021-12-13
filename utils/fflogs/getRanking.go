@@ -1,6 +1,12 @@
 package fflogs
 
-import "fmt"
+import (
+	"fmt"
+	"go-bot/utils/tools"
+	"io/ioutil"
+	"log"
+	"net/http"
+)
 
 // V2 v2接口参数 目前不会graphQL 暂时搁置
 var V2 = map[string]string{
@@ -20,10 +26,27 @@ type Client struct {
 }
 
 func GetRanking(data map[string]string) map[string]string {
-	accessToken := GetAccessToken(Client{
-		ClientId:     V2["ClientId"],
-		ClientSecret: V2["ClientSecret"],
-	})
-	fmt.Println("accessToken:", accessToken)
+	//accessToken := GetAccessToken(Client{
+	//	ClientId:     V2["ClientId"],
+	//	ClientSecret: V2["ClientSecret"],
+	//})
+	//fmt.Println("accessToken:", accessToken)
+	// V1 版本发送logs请求
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "https://www.fflogs.com/v1/zones?api_key="+V1["Key"], nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	bodyText, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	response := tools.Bytes2Map2(bodyText)
+	fmt.Println("[logs返回结果]:", response)
 	return make(map[string]string)
 }
