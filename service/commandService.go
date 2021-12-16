@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"go-bot/utils/animeSearch"
+	"go-bot/utils/bilibili"
 	"go-bot/utils/fflogs"
 	"go-bot/utils/picSearch"
 	"go-bot/utils/taro"
@@ -56,6 +57,13 @@ func GetMessage(msg string) string {
 		url := strings.Split(strings.Split(msg, " ")[1], ",")
 		picUrl := strings.Replace(strings.Replace(url[2], "url=", "", -1), "]", "", -1)
 		str = animeSearch.AnimeSearch(picUrl)
+	}
+	// 主播开播状态
+	if strings.Index(msg, "zlive") >= 0 {
+		msg := bilibili.GetLiveStatus()
+		for _, val := range msg {
+			return val
+		}
 	}
 	return str
 }

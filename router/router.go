@@ -7,7 +7,7 @@ import (
 
 func InitRouter() {
 	r := gin.Default()
-
+	gin.SetMode(gin.DebugMode)
 	api := r.Group("/api")
 	{
 		api.GET("/event", controller.GetEventMessage)

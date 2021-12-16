@@ -17,6 +17,7 @@ func SendRequest(data map[string]string) {
 	//	fmt.Println("sendErr", err)
 	//}
 	//fmt.Println("[resp]", resp)
+
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
