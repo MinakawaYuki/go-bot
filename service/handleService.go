@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"fmt"
+	"go-bot/setting"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 
 // SendRequest 处理私聊请求
 func SendRequest(data map[string]string) {
-	url := "http://127.0.0.1:5700/" + data["action"] + "?" + data["type"] + "=" + data["type_id"] + "&message=" + data["message"]
+	url := "http://" + setting.BotSetting.IP + ":" + setting.BotSetting.Port + "/" + data["action"] + "?" + data["type"] + "=" + data["type_id"] + "&message=" + data["message"]
 	//fmt.Println("[url]:", url)
 	//resp, err := http.Get(url)
 	//if err != nil {

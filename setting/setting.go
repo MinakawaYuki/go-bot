@@ -16,8 +16,15 @@ type Redis struct {
 	DB          int
 }
 
+type Bot struct {
+	IP   string
+	Port string
+}
+
 var RedisSetting = &Redis{}
 var RedisClient *redis.Client
+
+var BotSetting = &Bot{}
 
 func SetUp() {
 	Cfg, err := ini.Load("conf/config.ini")
@@ -27,6 +34,10 @@ func SetUp() {
 	err = Cfg.Section("redis").MapTo(&RedisSetting)
 	if err != nil {
 		fmt.Println("Cfg.MapTo RedisSetting err: ", err)
+	}
+	err = Cfg.Section("bot").MapTo(&BotSetting)
+	if err != nil {
+		fmt.Println("Cfg.MapTo BotSetting err: ", err)
 	}
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:     RedisSetting.Host,
