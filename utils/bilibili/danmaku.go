@@ -3,11 +3,14 @@ package bilibili
 import (
 	"errors"
 	"fmt"
+	"github.com/go-echarts/go-echarts/v2/charts"
+	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/jinzhu/gorm"
 	"go-bot/setting"
 	"go-bot/utils/tools"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -21,6 +24,11 @@ type danmaku struct {
 	Uid      string `gorm:"uid" json:"uid"`
 	Nickname string `gorm:"nickname" json:"nickname"`
 	Timeline string `gorm:"timeline" json:"timeline"`
+}
+
+type danmus struct {
+	Text  string
+	Count int
 }
 
 func GetDanmaku() {
@@ -82,4 +90,19 @@ func exsit(data danmaku) bool {
 
 func add(data danmaku) error {
 	return setting.Db.Create(&data).Error
+}
+
+func WordCloud() {
+	var list []danmus
+	setting.Db.Raw("SELECT `text`,count( `text` ) AS count FROM `danmaku` GROUP BY `text` ORDER BY `count` DESC").Scan(&list)
+	var items = make([]opts.WordCloudData, 0)
+	for _, v := range list {
+		items = append(items, opts.WordCloudData{Name: v.Text, Value: v.Count})
+	}
+	wc := charts.NewWordCloud()
+	wc.SetGlobalOptions(charts.WithTitleOpts(opts.Title{Title: "2021-12-17 词云"}))
+	wc.AddSeries("wordcloud", items).SetSeriesOptions(charts.WithWorldCloudChartOpts(opts.WordCloudChart{SizeRange: []float32{40, 80}, Shape: "cardioid"}))
+
+	f, _ := os.Create("wordCloud.html")
+	_ = wc.Render(f)
 }

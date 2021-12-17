@@ -79,7 +79,7 @@ func SetUp() {
 	}
 
 	Db.SingularTable(true)
-	Db.LogMode(true)
+	//Db.LogMode(true)
 	Db.DB().SetMaxIdleConns(10)
 	Db.DB().SetMaxOpenConns(100)
 }
