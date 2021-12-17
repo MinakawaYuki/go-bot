@@ -13,12 +13,13 @@ import (
 	"time"
 )
 
-var livers = []string{"6713974", "190331"}
+var livers = []string{"6713974", "190331", "1288041386"}
+var liver = []string{"6713974"}
 
 // GetLiveStatus 单次获取某主播开播状态
 func GetLiveStatus() []string {
 	var msg []string
-	for _, val := range livers {
+	for _, val := range liver {
 		client := &http.Client{}
 		req, err := http.NewRequest("GET", "https://api.bilibili.com/x/space/acc/info?mid="+val, nil)
 		if err != nil {
@@ -57,9 +58,9 @@ func GetLiveStatus() []string {
 func GetLiveStatusPerMin() {
 	for {
 		var post = map[string]string{
-			"action":  "send_group_msg",
-			"type":    "group_id",
-			"type_id": "430014266",
+			"action":  "send_private_msg",
+			"type":    "user_id",
+			"type_id": "283213563",
 			"message": "",
 		}
 		for _, val := range livers {
@@ -85,9 +86,10 @@ func GetLiveStatusPerMin() {
 			response := tools.Bytes2Map(bodyText)
 			response = response["data"].(map[string]interface{})
 			up := response["name"].(string)
-			fmt.Println("[liver status info]:正在查询" + up + "的直播状态....")
+			fmt.Println("[liver status info - " + time.Now().Format("2006/1/02 15:04") + "]:正在查询" + up + "的直播状态....")
 			liveInfo := response["live_room"].(map[string]interface{})
 			if liveInfo["liveStatus"].(float64) == 1 {
+				fmt.Println("[liver status info - " + time.Now().Format("2006/1/02 15:04") + "]:查询结果为正在直播....")
 				//修改redis中的主播直播间状态
 				if getStatusByRedis(val) == true {
 					err := setStatusByRedis(val, liveInfo["liveStatus"].(float64))
@@ -103,6 +105,7 @@ func GetLiveStatusPerMin() {
 					sendRequest(post)
 				}
 			} else {
+				fmt.Println("[liver status info - " + time.Now().Format("2006/1/02 15:04") + "]:查询结果为未开播....")
 				//修改redis中的主播直播间状态
 				if getStatusByRedis(val) == false {
 					err := setStatusByRedis(val, liveInfo["liveStatus"].(float64))
