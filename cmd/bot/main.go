@@ -9,5 +9,6 @@ import (
 func main() {
 	setting.SetUp()
 	go bilibili.GetLiveStatusPerMin()
+	go bilibili.GetDanmaku()
 	router.InitRouter()
 }

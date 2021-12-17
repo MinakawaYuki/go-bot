@@ -91,7 +91,7 @@ func GetLiveStatusPerMin() {
 			if liveInfo["liveStatus"].(float64) == 1 {
 				fmt.Println("[liver status info - " + time.Now().Format("2006/1/02 15:04") + "]:查询结果为正在直播....")
 				//修改redis中的主播直播间状态
-				if getStatusByRedis(val) == true {
+				if GetStatusByRedis(val) == true {
 					err := setStatusByRedis(val, liveInfo["liveStatus"].(float64))
 					if err != nil {
 						fmt.Println("[redis]保存直播状态"+liveInfo["liveStatus"].(string)+"失败:", err)
@@ -111,7 +111,7 @@ func GetLiveStatusPerMin() {
 			} else {
 				fmt.Println("[liver status info - " + time.Now().Format("2006/1/02 15:04") + "]:查询结果为未开播....")
 				//修改redis中的主播直播间状态
-				if getStatusByRedis(val) == false {
+				if GetStatusByRedis(val) == false {
 					err := setStatusByRedis(val, liveInfo["liveStatus"].(float64))
 					if err != nil {
 						fmt.Println("[redis]保存直播状态失败:", err)
@@ -127,8 +127,8 @@ func GetLiveStatusPerMin() {
 	}
 }
 
-// getStatusByRedis 查询redis中的直播间状态
-func getStatusByRedis(mid string) bool {
+// GetStatusByRedis 查询redis中的直播间状态
+func GetStatusByRedis(mid string) bool {
 	ctx := context.Background()
 	client := setting.RedisClient
 	status, _ := client.Get(ctx, mid).Float64()
