@@ -65,8 +65,8 @@ func GetLiveStatusPerMin() {
 		}
 		for _, val := range livers {
 			// 先检查redis中是否有数据
-			if getExistByRedis(val) == true {
-				continue
+			if getExistByRedis(val) == false {
+				setStatusByRedis(val, 0)
 			}
 			client := &http.Client{}
 			req, err := http.NewRequest("GET", "https://api.bilibili.com/x/space/acc/info?mid="+val, nil)
@@ -97,6 +97,10 @@ func GetLiveStatusPerMin() {
 						fmt.Println("[redis]保存直播状态"+liveInfo["liveStatus"].(string)+"失败:", err)
 					}
 				} else {
+					err := setStatusByRedis(val, liveInfo["liveStatus"].(float64))
+					if err != nil {
+						fmt.Println("[redis]保存直播状态"+liveInfo["liveStatus"].(string)+"失败:", err)
+					}
 					message := up + "开播了\n" +
 						"标题:" + liveInfo["title"].(string) + "\n" +
 						"直播间地址:" + liveInfo["url"].(string) + "\n" +
@@ -138,8 +142,18 @@ func getStatusByRedis(mid string) bool {
 func setStatusByRedis(mid string, status float64) error {
 	ctx := context.Background()
 	client := setting.RedisClient
-	_, err := client.Set(ctx, mid, status, time.Minute).Result()
-	return err
+	if status == 1 {
+		_, err := client.Set(ctx, mid, status, time.Hour*3).Result()
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := client.Set(ctx, mid, status, time.Minute).Result()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // getExistByRedis 查询key是否存在
