@@ -10,7 +10,7 @@ func Bytes2Map(p []byte) (data map[string]interface{}) {
 	json := bytes.NewBuffer(p).String()
 	data, err := gjson.Parse(json).Value().(map[string]interface{})
 	if !err {
-		panic("解析json错误")
+		return make(map[string]interface{})
 	}
 
 	return data
