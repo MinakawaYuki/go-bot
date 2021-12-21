@@ -57,6 +57,9 @@ func GetDanmaku() {
 
 		response := tools.Bytes2Map(body)["data"]
 
+		if response == nil {
+			continue
+		}
 		room := response.(map[string]interface{})["room"]
 
 		danmakuList := room.([]interface{})
@@ -78,6 +81,7 @@ func GetDanmaku() {
 		//休眠
 		time.Sleep(time.Millisecond * 500)
 	}
+	fmt.Println("[主播下播了---close 数据库连接]")
 	defer setting.Db.Close()
 }
 
@@ -94,7 +98,7 @@ func add(data danmaku) error {
 
 func WordCloud() {
 	var list []danmus
-	setting.Db.Raw("SELECT `text`,count( `text` ) AS count FROM `danmaku` GROUP BY `text` ORDER BY `count` DESC").Scan(&list)
+	setting.Db.Raw("SELECT `text`,count( `text` ) AS count FROM `danmaku` GROUP BY `text` HAVING COUNT(`count`) > 10 ORDER BY `count` DESC").Scan(&list)
 	var items = make([]opts.WordCloudData, 0)
 	for _, v := range list {
 		items = append(items, opts.WordCloudData{Name: v.Text, Value: v.Count})
