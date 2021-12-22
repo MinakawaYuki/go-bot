@@ -35,6 +35,11 @@ type Mysql struct {
 	Dbname   string
 }
 
+type Plugin struct {
+	Live    bool
+	Danmaku bool
+}
+
 // 初始化redis
 var RedisSetting = &Redis{}
 var RedisClient *redis.Client
@@ -48,6 +53,9 @@ var Db *gorm.DB
 
 // 全局logrus实例
 var Log = logrus.New()
+
+// plugin设置
+var PluginSetting = &Plugin{}
 
 func SetUp() {
 	// 初始化log
@@ -69,20 +77,23 @@ func SetUp() {
 	// 读取配置文件
 	Cfg, err := ini.Load("conf/config.ini")
 	if err != nil {
-		Log.Error("Fail to parse 'conf/config.ini': ", err)
-		os.Exit(0)
+		Log.Fatal("Fail to parse 'conf/config.ini': ", err)
 	}
 	err = Cfg.Section("redis").MapTo(&RedisSetting)
 	if err != nil {
-		Log.Error("Cfg.MapTo RedisSetting err: ", err)
+		Log.Warning("Cfg.MapTo RedisSetting err: ", err)
 	}
 	err = Cfg.Section("bot").MapTo(&BotSetting)
 	if err != nil {
-		Log.Error("Cfg.MapTo BotSetting err: ", err)
+		Log.Fatal("Cfg.MapTo BotSetting err: ", err)
 	}
 	err = Cfg.Section("mysql").MapTo(&DbSetting)
 	if err != nil {
-		Log.Error("Cfg.MapTo BotSetting err: ", err)
+		Log.Warning("Cfg.MapTo BotSetting err: ", err)
+	}
+	err = Cfg.Section("plugin").MapTo(&PluginSetting)
+	if err != nil {
+		Log.Warning("Cfg.MapTo PluginSetting err: ", err)
 	}
 
 	// 初始化redis
@@ -101,7 +112,7 @@ func SetUp() {
 	if err != nil {
 		Log.Error("models.Setup err: ", err)
 	} else {
-		Log.Fatal("数据库连接成功")
+		Log.Info("数据库连接成功")
 	}
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
 		return defaultTableName
