@@ -63,21 +63,25 @@ func GetDanmaku() {
 		room := response.(map[string]interface{})["room"]
 
 		danmakuList := room.([]interface{})
-		length := len(danmakuList)
-		data := danmakuList[length-1].(map[string]interface{})
+		//length := len(danmakuList)
+		//data := danmakuList[length-1].(map[string]interface{})
 
-		dan := danmaku{
-			Text:     data["text"].(string),
-			Uid:      fmt.Sprintf("%f", data["uid"].(float64)),
-			Nickname: data["nickname"].(string),
-			Timeline: data["timeline"].(string),
-		}
-		if exsit(dan) {
-			err := add(dan)
-			if err != nil {
-				fmt.Println("[add danmaku err]:", err)
+		for _, item := range danmakuList {
+			data := item.(map[string]interface{})
+			dan := danmaku{
+				Text:     data["text"].(string),
+				Uid:      fmt.Sprintf("%f", data["uid"].(float64)),
+				Nickname: data["nickname"].(string),
+				Timeline: data["timeline"].(string),
+			}
+			if exsit(dan) {
+				err := add(dan)
+				if err != nil {
+					fmt.Println("[add danmaku err]:", err)
+				}
 			}
 		}
+
 		//休眠
 		time.Sleep(time.Millisecond * 500)
 	}
