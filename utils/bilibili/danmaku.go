@@ -98,13 +98,13 @@ func add(data danmaku) error {
 
 func WordCloud() {
 	var list []danmus
-	setting.Db.Raw("SELECT `text`,count( `text` ) AS count FROM `danmaku` GROUP BY `text` HAVING COUNT(`count`) > 10 ORDER BY `count` DESC").Scan(&list)
+	setting.Db.Raw("SELECT `text`,count( `text` ) AS count FROM `danmaku` where `text` not in ('?','？？？','？？','？？？？','？？？？？','？？？？？？','？？？？？？？','???') GROUP BY `text` HAVING COUNT(`count`) > 10 ORDER BY `count` DESC").Scan(&list)
 	var items = make([]opts.WordCloudData, 0)
 	for _, v := range list {
 		items = append(items, opts.WordCloudData{Name: v.Text, Value: v.Count})
 	}
 	wc := charts.NewWordCloud()
-	wc.SetGlobalOptions(charts.WithTitleOpts(opts.Title{Title: "2021-12-17 词云"}))
+	wc.SetGlobalOptions(charts.WithTitleOpts(opts.Title{Title: time.Now().Format("2006-1-02") + " 词云"}))
 	wc.AddSeries("wordcloud", items).SetSeriesOptions(charts.WithWorldCloudChartOpts(opts.WordCloudChart{SizeRange: []float32{40, 80}, Shape: "cardioid"}))
 
 	f, _ := os.Create("wordCloud.html")
