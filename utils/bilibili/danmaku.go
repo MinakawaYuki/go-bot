@@ -32,7 +32,8 @@ type danmus struct {
 }
 
 func GetDanmaku() {
-	for GetStatusByRedis(mid) == true {
+	//for GetStatusByRedis(mid) == true {
+	for {
 		client := &http.Client{}
 		req, err := http.NewRequest("POST", liveUrl, strings.NewReader("roomid="+roomId))
 		if err != nil {
@@ -85,8 +86,8 @@ func GetDanmaku() {
 		//休眠
 		time.Sleep(time.Millisecond * 500)
 	}
-	fmt.Println("[主播下播了---close 数据库连接]")
-	defer setting.Db.Close()
+	//fmt.Println("[主播下播了---close 数据库连接]")
+	//defer setting.Db.Close()
 }
 
 func exsit(data danmaku) bool {
