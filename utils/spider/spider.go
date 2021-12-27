@@ -16,6 +16,21 @@ gbf wiki
 标签<div class="ability-table-row ec-1-m" id=".E5.A5.A5.E4.B9.891">未终突奥义
 标签<div class="ability-table-row ec-1-m" id=".E5.A5.A5.E4.B9.892">终突奥义
 标签<div class="ability-table-row ec-1-m" id=".E5.A5.A5.E4.B9.893">超限奥义 <div class="ability-desc ab-block full-size">…</div> 技能效果
+
+<div class="ability-table-row ec-1-m" id=".E8.A2.AB.E5.8A.A81">…</div>被动技能
+<div class="ability-table-row ec-1-m" id=".E8.A2.AB.E5.8A.A82">…</div>被动技能
+<div class="ability-table-row ec-1-m" id=".E8.A2.AB.E5.8A.A83">…</div>被动技能
+
+
+<div class="ability-table-row ec-1-m" id="LB1">…</div>LB技能
+<div class="ability-table-row ec-1-m" id="LB2">…</div>LB技能
+
+
+标签<div class="gbf-infobox-section ec-2"> > <div class="content js-value" data-vkey="name_jp">シス</div>  日文名
+
+标签<div class="gbf-infobox-section ec-2 col-2 col-sp">…</div>  >  <div class="content center text-value">  >  <div class="hp-value jp js-value" data-vkey="mhp" data-copy-title="1" title="1666 ▶ 1966">HP
+标签<div class="gbf-infobox-section ec-2 col-2 col-sp">…</div>  >  <div class="content center text-value">  >  <div class="atk-value jp js-value" data-vkey="matk" data-copy-title="1" title="6666 ▶ 8666">ATK
+
 */
 
 // Character 角色
@@ -24,8 +39,6 @@ type Character struct {
 	HP           string `json:"HP"`
 	Attack       string `json:"attack" gorm:"comment:'攻击力'"`
 	Ougi         string `json:"ougi" gorm:"column:ougi;type:longtext;comment:'奥义'"`
-	Ougi2        string `json:"ougi2" gorm:"column:ougi2;type:longtext;comment:'终突奥义'"`
-	Ougi3        string `json:"ougi3" gorm:"column:ougi3;type:longtext;comment:'超限奥义'"`
 	Ability      string `json:"ability" gorm:"column:ability;type:longtext;comment:'技能'"`
 	PassiveSkill string `json:"passive_skill" gorm:"column:passive_skill;type:longtext;comment:'被动技能'"`
 	LBSkill      string `json:"LBSkill" gorm:"column:LBSkill;type:longtext;comment:'LB技能'"`
