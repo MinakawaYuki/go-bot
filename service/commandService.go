@@ -59,11 +59,16 @@ func GetMessage(msg string) string {
 		str = animeSearch.AnimeSearch(picUrl)
 	}
 	// 主播开播状态
-	if strings.Index(msg, "zlive") >= 0 {
-		msg := bilibili.GetLiveStatus()
-		for _, val := range msg {
-			return val
-		}
+	//if strings.Index(msg, "zlive") >= 0 {
+	//	msg := bilibili.GetLiveStatus()
+	//	for _, val := range msg {
+	//		return val
+	//	}
+	//}
+	// 新增关注的主播
+	if strings.Index(msg, "addliver") >= 0 {
+		mid := strings.Split(msg, " ")[1]
+		str = bilibili.AddLiver(mid)
 	}
 	return str
 }
