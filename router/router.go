@@ -11,6 +11,8 @@ func InitRouter() {
 	api := r.Group("/api")
 	{
 		api.GET("/event", controller.GetEventMessage)
+		//api.GET("/client")
+		api.POST("/upload", controller.SavePartyPic)
 	}
 	r.Run("localhost:10940")
 }

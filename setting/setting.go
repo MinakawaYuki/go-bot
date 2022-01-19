@@ -40,6 +40,14 @@ type Plugin struct {
 	Danmaku bool
 }
 
+type Runtime struct {
+	ImageMaxSize    int
+	ImagePrefixUrl  string
+	ImageSavePath   string
+	RuntimeRootPath string
+	ImageAllowExts  []string
+}
+
 // 初始化redis
 var RedisSetting = &Redis{}
 var RedisClient *redis.Client
@@ -56,6 +64,8 @@ var Log = logrus.New()
 
 // plugin设置
 var PluginSetting = &Plugin{}
+
+var RuntimeSetting = &Runtime{}
 
 func SetUp() {
 	// 初始化log
@@ -94,6 +104,10 @@ func SetUp() {
 	err = Cfg.Section("plugin").MapTo(&PluginSetting)
 	if err != nil {
 		Log.Warning("Cfg.MapTo PluginSetting err: ", err)
+	}
+	err = Cfg.Section("runtime").MapTo(&RuntimeSetting)
+	if err != nil {
+		Log.Warning("Cfg.MapTo RuntimeSetting err: ", err)
 	}
 
 	// 初始化redis
