@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-var livers = []string{"6713974", "190331", "1288041386"}
+var livers = []string{"6713974", "190331", "1934433723"}
 
 // Liver 主播
 type Liver struct {
@@ -76,10 +76,6 @@ func GetLiveStatusPerMin() {
 			"message": "",
 		}
 		for _, val := range livers {
-			// 先检查redis中是否有数据
-			if getExistByRedis(val) == false {
-				setStatusByRedis(val, 0)
-			}
 			client := &http.Client{}
 			req, err := http.NewRequest("GET", "https://api.bilibili.com/x/space/acc/info?mid="+val, nil)
 			if err != nil {
@@ -100,42 +96,28 @@ func GetLiveStatusPerMin() {
 			up := response["name"].(string)
 			fmt.Println("[liver status info - " + time.Now().Format("2006/1/02 15:04") + "]:正在查询" + up + "的直播状态....")
 			liveInfo := response["live_room"].(map[string]interface{})
-			if liveInfo["liveStatus"].(float64) == 1 {
-				fmt.Println("[liver status info - " + time.Now().Format("2006/1/02 15:04") + "]:查询结果为正在直播....")
-				//修改redis中的主播直播间状态
-				if GetStatusByRedis(val) == true {
-					err := setStatusByRedis(val, liveInfo["liveStatus"].(float64))
-					if err != nil {
-						fmt.Println("[redis]保存直播状态"+liveInfo["liveStatus"].(string)+"失败:", err)
-					}
-				} else {
-					err := setStatusByRedis(val, liveInfo["liveStatus"].(float64))
-					if err != nil {
-						fmt.Println("[redis]保存直播状态"+liveInfo["liveStatus"].(string)+"失败:", err)
-					}
+
+			//使用数据库判定是否开播 启用redis
+			var liver Liver
+			setting.Db.Where("user_id = ? ", val).First(&liver)
+			if liveInfo["liveStatus"].(float64) != liver.LiveStatus {
+				if liver.LiveStatus == 0 {
 					message := up + "开播了\n" +
 						"标题:" + liveInfo["title"].(string) + "\n" +
 						"直播间地址:" + liveInfo["url"].(string) + "\n" +
 						"封面:" + "[CQ:image,file=" + liveInfo["cover"].(string) + "]"
 					post["message"] = url.QueryEscape(message)
 					sendRequest(post)
-				}
-			} else {
-				fmt.Println("[liver status info - " + time.Now().Format("2006/1/02 15:04") + "]:查询结果为未开播....")
-				//修改redis中的主播直播间状态
-				if GetStatusByRedis(val) == false {
-					err := setStatusByRedis(val, liveInfo["liveStatus"].(float64))
-					if err != nil {
-						fmt.Println("[redis]保存直播状态失败:", err)
-					}
 				} else {
 					message := up + "下播了\n"
 					post["message"] = url.QueryEscape(message)
 					sendRequest(post)
 				}
+				// 保存直播状态
+				setting.Db.Table("liver").Where("user_id = ? ", val).Update(map[string]interface{}{"title": liveInfo["title"].(string), "cover": liveInfo["cover"].(string), "live_status": liveInfo["liveStatus"].(float64)})
 			}
 		}
-		time.Sleep(time.Second * 150)
+		time.Sleep(time.Second * 30)
 	}
 }
 
@@ -200,12 +182,12 @@ func setStatusByRedis(mid string, status float64) error {
 	ctx := context.Background()
 	client := setting.RedisClient
 	if status == 1 {
-		_, err := client.Set(ctx, mid, status, time.Hour*3).Result()
+		_, err := client.Set(ctx, mid, status, 0).Result()
 		if err != nil {
 			return err
 		}
 	} else {
-		_, err := client.Set(ctx, mid, status, time.Minute).Result()
+		_, err := client.Set(ctx, mid, status, 0).Result()
 		if err != nil {
 			return err
 		}

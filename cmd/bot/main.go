@@ -16,5 +16,5 @@ func main() {
 		go bilibili.GetDanmaku()
 	}
 	router.InitRouter()
-	//spider.Result()
+	//spider.Scrape()
 }
