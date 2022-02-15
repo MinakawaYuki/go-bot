@@ -28,44 +28,6 @@ type Liver struct {
 	Cover      string  `json:"cover,omitempty"`
 }
 
-// GetLiveStatus 单次获取某主播开播状态
-//func GetLiveStatus() []string {
-//	var msg []string
-//	for _, val := range liver {
-//		client := &http.Client{}
-//		req, err := http.NewRequest("GET", "https://api.bilibili.com/x/space/acc/info?mid="+val, nil)
-//		if err != nil {
-//			fmt.Println("req Err", err)
-//		}
-//		resp, err := client.Do(req)
-//		if err != nil {
-//			fmt.Println("resp Err", err)
-//		}
-//		defer resp.Body.Close()
-//
-//		bodyText, err := ioutil.ReadAll(resp.Body)
-//		if err != nil {
-//			fmt.Println("bodyText Err", err)
-//		}
-//		response := tools.Bytes2Map(bodyText)
-//		fmt.Println("[liver response]:", response)
-//		response = response["data"].(map[string]interface{})
-//		up := response["name"].(string)
-//		liveInfo := response["live_room"].(map[string]interface{})
-//		if liveInfo["liveStatus"].(float64) == 1 {
-//			message := up + "开播了\n" +
-//				"标题:" + liveInfo["title"].(string) + "\n" +
-//				"直播间地址:" + liveInfo["url"].(string) + "\n" +
-//				"封面:" + "[CQ:image,file=" + liveInfo["cover"].(string) + "]"
-//			msg = append(msg, url.QueryEscape(message))
-//		} else {
-//			message := up + "是懒狗，根本不播！"
-//			msg = append(msg, url.QueryEscape(message))
-//		}
-//	}
-//	return msg
-//}
-
 // GetLiveStatusPerMin 轮询获取主播开播状态
 func GetLiveStatusPerMin() {
 	for {
@@ -92,29 +54,36 @@ func GetLiveStatusPerMin() {
 			resp.Body.Close()
 
 			response := tools.Bytes2Map(bodyText)
-			response = response["data"].(map[string]interface{})
-			up := response["name"].(string)
-			fmt.Println("[liver status info - " + time.Now().Format("2006/1/02 15:04") + "]:正在查询" + up + "的直播状态....")
-			liveInfo := response["live_room"].(map[string]interface{})
-
-			//使用数据库判定是否开播 启用redis
-			var liver Liver
-			setting.Db.Where("user_id = ? ", val).First(&liver)
-			if liveInfo["liveStatus"].(float64) != liver.LiveStatus {
-				if liver.LiveStatus == 0 {
-					message := up + "开播了\n" +
-						"标题:" + liveInfo["title"].(string) + "\n" +
-						"直播间地址:" + liveInfo["url"].(string) + "\n" +
-						"封面:" + "[CQ:image,file=" + liveInfo["cover"].(string) + "]"
+			if response != nil {
+				response = response["data"].(map[string]interface{})
+				up := response["name"].(string)
+				fmt.Println("[liver status info - " + time.Now().Format("2006/1/02 15:04") + "]:正在查询" + up + "的直播状态....")
+				liveInfo, err := response["live_room"].(map[string]interface{})
+				if err != true {
+					message := "断言失败"
 					post["message"] = url.QueryEscape(message)
 					sendRequest(post)
-				} else {
-					message := up + "下播了\n"
-					post["message"] = url.QueryEscape(message)
-					sendRequest(post)
+					continue
 				}
-				// 保存直播状态
-				setting.Db.Table("liver").Where("user_id = ? ", val).Update(map[string]interface{}{"title": liveInfo["title"].(string), "cover": liveInfo["cover"].(string), "live_status": liveInfo["liveStatus"].(float64)})
+				//使用数据库判定是否开播 启用redis
+				var liver Liver
+				setting.Db.Where("user_id = ? ", val).First(&liver)
+				if liveInfo["liveStatus"].(float64) != liver.LiveStatus {
+					if liver.LiveStatus == 0 {
+						message := up + "开播了\n" +
+							"标题:" + liveInfo["title"].(string) + "\n" +
+							"直播间地址:" + liveInfo["url"].(string) + "\n" +
+							"封面:" + "[CQ:image,file=" + liveInfo["cover"].(string) + "]"
+						post["message"] = url.QueryEscape(message)
+						sendRequest(post)
+					} else {
+						message := up + "下播了\n"
+						post["message"] = url.QueryEscape(message)
+						sendRequest(post)
+					}
+					// 保存直播状态
+					setting.Db.Table("liver").Where("user_id = ? ", val).Update(map[string]interface{}{"title": liveInfo["title"].(string), "cover": liveInfo["cover"].(string), "live_status": liveInfo["liveStatus"].(float64)})
+				}
 			}
 		}
 		time.Sleep(time.Second * 30)
